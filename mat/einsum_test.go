@@ -1,6 +1,10 @@
 package mat
 
-import "testing"
+import (
+	"testing"
+
+	"golang.org/x/exp/rand"
+)
 
 func TestEinsum(t *testing.T) {
 	// Various structures that can be used in tests.
@@ -235,5 +239,20 @@ func TestEinsumParse(t *testing.T) {
 			t.Errorf("different string for parsed Einsum for test %d: got: %v expect: %v", i, str, tc.subscripts)
 			continue
 		}
+	}
+}
+
+func BenchmarkEinsumMatMul10(b *testing.B)   { einsumBench(b, "ij,jk->ik", 10) }
+func BenchmarkEinsumMatMul100(b *testing.B)  { einsumBench(b, "ij,jk->ik", 100) }
+func BenchmarkEinsumMatMul1000(b *testing.B) { einsumBench(b, "ij,jk->ik", 1000) }
+
+func einsumBench(b *testing.B, subscripts string, size int) {
+	src := rand.NewSource(1)
+	A, _ := randDense(size, 1, src)
+	B, _ := randDense(size, 1, src)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, _ = Einsum(subscripts, A, B)
 	}
 }
