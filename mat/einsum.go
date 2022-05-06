@@ -34,10 +34,10 @@ func Einsum(
 			// Get current counter values for the runes,
 			// representing the location in the output that
 			// we want to modify.
-			var indexes []int
+			indexes := make([]int, 0, 2)
 			for _, r := range ops.inputs[i] {
 				indexes = append(indexes,
-					exc.counterFor(r).v)
+					exc.counterValFor(r))
 			}
 
 			// NOTE: This only allows 1D Vector or 2D Matrix inputs
@@ -136,10 +136,12 @@ func (c *einsumExecutor) outputIdx() int {
 }
 
 // counterFor returns the counter for the given rune.
-func (c *einsumExecutor) counterFor(r rune) einsumCounter {
+func (c *einsumExecutor) counterValFor(r rune) int {
+	// NOTE: Using a map here does not make things faster, because of the
+	// limited number of values.
 	for _, c := range c.c {
 		if c.r == r {
-			return c
+			return c.v
 		}
 	}
 	panic(fmt.Errorf("einsumCounter not found for rune: %q", r))
@@ -316,8 +318,8 @@ func (o einsumOps) StringWithExecutor(exc *einsumExecutor) string {
 	var b strings.Builder
 	w := func(r rune) {
 		b.WriteRune(r)
-		ec := exc.counterFor(r)
-		fmt.Fprintf(&b, "(%d)", ec.v)
+		v := exc.counterValFor(r)
+		fmt.Fprintf(&b, "(%d)", v)
 	}
 	for x := range o.inputs {
 		for y := range o.inputs[x] {

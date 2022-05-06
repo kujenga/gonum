@@ -242,16 +242,21 @@ func TestEinsumParse(t *testing.T) {
 	}
 }
 
-func BenchmarkEinsumMatMul10(b *testing.B)   { einsumBench(b, "ij,jk->ik", 10) }
-func BenchmarkEinsumMatMul100(b *testing.B)  { einsumBench(b, "ij,jk->ik", 100) }
-func BenchmarkEinsumMatMul1000(b *testing.B) { einsumBench(b, "ij,jk->ik", 1000) }
+func BenchmarkEinsumMulDense10Half(b *testing.B)         { einsumBench(b, "ij,jk->ik", 10, 0.5) }
+func BenchmarkEinsumMulDense100Half(b *testing.B)        { einsumBench(b, "ij,jk->ik", 100, 0.5) }
+func BenchmarkEinsumMulDense100Tenth(b *testing.B)       { einsumBench(b, "ij,jk->ik", 100, 0.1) }
+func BenchmarkEinsumMulDense1000Full(b *testing.B)       { einsumBench(b, "ij,jk->ik", 1000, 1.0) }
+func BenchmarkEinsumMulDense1000Half(b *testing.B)       { einsumBench(b, "ij,jk->ik", 1000, 0.5) }
+func BenchmarkEinsumMulDense1000Tenth(b *testing.B)      { einsumBench(b, "ij,jk->ik", 1000, 0.1) }
+func BenchmarkEinsumMulDense1000Hundredth(b *testing.B)  { einsumBench(b, "ij,jk->ik", 1000, 0.01) }
+func BenchmarkEinsumMulDense1000Thousandth(b *testing.B) { einsumBench(b, "ij,jk->ik", 1000, 0.001) }
 
-func einsumBench(b *testing.B, subscripts string, size int) {
+func einsumBench(b *testing.B, subscripts string, size int, rho float64) {
 	src := rand.NewSource(1)
-	A, _ := randDense(size, 1, src)
-	B, _ := randDense(size, 1, src)
-
-	b.ResetTimer()
+	b.StopTimer()
+	A, _ := randDense(size, rho, src)
+	B, _ := randDense(size, rho, src)
+	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		_, _ = Einsum(subscripts, A, B)
 	}
