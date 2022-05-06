@@ -31,19 +31,25 @@ func Einsum(
 		// is one because the value is arrived at multiplicatively.
 		var cur float64 = 1
 		for i, o := range operands {
-			// Get current counter values for the runes.
+			// Get current counter values for the runes,
+			// representing the location in the output that
+			// we want to modify.
+			var indexes []int
+			for _, r := range ops.inputs[i] {
+				indexes = append(indexes,
+					exc.counterFor(r).v)
+			}
+
 			// NOTE: This only allows 1D Vector or 2D Matrix inputs
 			// at present, as that is what the Matrix data
 			// structure supports in gonum. This could be extended
 			// quite easily to work with a function signature like
 			// .At(i ...int) for an N-dimensional array.
-			a := exc.counterFor(ops.inputs[i][0]).v
-			var b int // zero default is appropriate for Vectors.
-			if len(ops.inputs[i]) > 1 {
-				b = exc.counterFor(ops.inputs[i][1]).v
+			if len(indexes) == 1 {
+				cur *= o.At(indexes[0], 0)
+			} else {
+				cur *= o.At(indexes[0], indexes[1])
 			}
-
-			cur *= o.At(a, b)
 		}
 		// Add the resulting multiplied value to the summation.
 		out[outputIdx] += cur
