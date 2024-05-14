@@ -2141,6 +2141,7 @@ var (
 
 func BenchmarkMulDense100Half(b *testing.B)        { denseMulBench(b, 100, 0.5) }
 func BenchmarkMulDense100Tenth(b *testing.B)       { denseMulBench(b, 100, 0.1) }
+func BenchmarkMulDense1000Full(b *testing.B)       { denseMulBench(b, 1000, 1.0) }
 func BenchmarkMulDense1000Half(b *testing.B)       { denseMulBench(b, 1000, 0.5) }
 func BenchmarkMulDense1000Tenth(b *testing.B)      { denseMulBench(b, 1000, 0.1) }
 func BenchmarkMulDense1000Hundredth(b *testing.B)  { denseMulBench(b, 1000, 0.01) }
